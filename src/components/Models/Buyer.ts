@@ -3,11 +3,9 @@ import { IBuyer, ValidError } from '../../types/index.ts';
 export class Buyer {
 
     private buyer: Partial<IBuyer>;
-    private errors: ValidError;
 
     constructor(buyer: IBuyer) {
         this.buyer = {...buyer};
-        this.errors = {};
     }
 
     public setInfo(partialData: Partial<IBuyer>): void {
@@ -23,7 +21,7 @@ export class Buyer {
     }
 
     public isValid(): ValidError {      
-        this.errors = {};
+        let errors: ValidError = {};
 
         const requiredFields: (keyof IBuyer)[] = ['payment', 'email', 'phone', 'address'];
         
@@ -31,9 +29,9 @@ export class Buyer {
             const value = this.buyer[key];
 
             if (value === '' || value === null  || value === undefined) {
-                this.errors[key as keyof IBuyer] = 'Отсутствует значение';
+                errors[key as keyof IBuyer] = `Отсутствует значение у поля ${key}`;
             }
         }
-        return this.errors;
+        return errors;
     }
 }

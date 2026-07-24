@@ -1,6 +1,6 @@
 export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
-export type TPayment = 'cash' | 'card' | '';
+export type TPayment = 'cash' | 'card';
 
 export type ValidError = Partial<Record<keyof IBuyer, string>>;
 
@@ -19,13 +19,13 @@ export interface IProduct {
 }
 
 export interface IBuyer {
-    payment: TPayment;
+    payment: TPayment | '';
     email: string;
     phone: string;
     address: string;
 }
 
-export type TGetData = {
+export type TGetProductsData = {
     total: number;
     items: IProduct[];
 }

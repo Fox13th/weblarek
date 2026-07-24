@@ -185,6 +185,6 @@ Presenter - презентер содержит основную логику п
 `api: IApi` - объект интерфейса IApi.
 
 Методы:
-`get(): Promise<TGetData>` - получает с сервера объект с массивом товаров. `TGetData` - тип возвращаемого объекта;
+`get(): Promise<TGetProductsData>` - получает с сервера объект с массивом товаров. `TGetProductsData` - тип возвращаемого объекта;
 `post(orderInfo: TOrderData): Promise<TOrderResponse>` - отправляет на сервер данные о покупателе и выбранных товарах. `TOrderData` - тип принимаемого объекта; `TOrderResponse` - тип принимаемого объекта.
 

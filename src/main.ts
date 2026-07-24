@@ -4,7 +4,7 @@ import { Products } from './components/Models/Products.ts';
 import { Basket } from './components/Models/Basket.ts';
 import { Buyer } from './components/Models/Buyer.ts'; 
 import { Api } from './components/base/Api.ts';
-import { ApiQuery } from './components/base/ApiQuery.ts';
+import { ApiQuery } from './components/ApiQuery.ts';
 
 import { apiProducts } from './utils/data';
 import { IBuyer, TOrderData } from './types/index.ts';
@@ -19,11 +19,11 @@ products.setItems(apiProducts.items);
 console.log('Массив товаров из каталога: ', products.getItems());
 
 
-const prod_id = products.getProductById('c101ab44-ed99-4a54-990d-47aa2bb4e7d9');
-console.log('Товар по ID: ', prod_id);
+const idProd = products.getProductById('c101ab44-ed99-4a54-990d-47aa2bb4e7d9');
+console.log('Товар по ID: ', idProd);
 
-if (prod_id) {
-    products.setSelectedProduct(prod_id);
+if (idProd) {
+    products.setSelectedProduct(idProd);
 }
 console.log('Выбранный товар из каталога: ', products.getSelectedProduct());
 
@@ -67,13 +67,15 @@ console.log('Информация о пользователе после очи�
 
 // Тесты на взаимодействие с сервером
 // GET-запрос
-const apiAnswer = new ApiQuery(api);
+const apiClient = new ApiQuery(api);
 
-apiAnswer.get().then(data => {
-    console.log('Ответ на GET-запрос: ', data);
-    products.setItems(data.items);
-    console.log('Массив товаров из каталога после GET-запроса: ', products.getItems());
-});
+apiClient.get()
+    .then(data => {
+        console.log('Ответ на GET-запрос: ', data);
+        products.setItems(data.items);
+        console.log('Массив товаров из каталога после GET-запроса: ', products.getItems());
+    })
+    .catch(error => console.log(`Ошибка при выполнении GET-запроса: ${error}`));
 
 const makeOrder: TOrderData = {
     payment: "card", 
@@ -88,4 +90,6 @@ const makeOrder: TOrderData = {
 } 
 
 // POST-запрос
-apiAnswer.post(makeOrder).then(response => console.log('Ответ на POST-запрос: ', response));
+apiClient.post(makeOrder)
+    .then(response => console.log('Ответ на POST-запрос: ', response))
+    .catch(error => console.log(`Ошибка при выполнении POST-запроса: ${error}`));

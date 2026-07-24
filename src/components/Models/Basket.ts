@@ -25,10 +25,7 @@ export class Basket {
 
     public getTotalPrice(): number {
         return this.selectedProducts.reduce((sum, currentValue) => { 
-            if (currentValue.price !== null) {
-                return sum + currentValue.price;
-            }
-            return sum;
+            return sum + (currentValue.price ?? 0);
         }, 0);
     }
 
