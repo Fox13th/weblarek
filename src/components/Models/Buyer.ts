@@ -24,12 +24,19 @@ export class Buyer {
         let errors: ValidError = {};
 
         const requiredFields: (keyof IBuyer)[] = ['payment', 'email', 'phone', 'address'];
+
+        const translatedFields: Map<string, string> = new Map([
+            ['payment', 'способ оплаты'], 
+            ['email', 'электронная почта'], 
+            ['phone', 'телефон'], 
+            ['address', 'адрес']
+        ]);
         
         for (const key of requiredFields) {
             const value = this.buyer[key];
 
             if (value === '' || value === null  || value === undefined) {
-                errors[key as keyof IBuyer] = `Отсутствует значение у поля ${key}`;
+                errors[key as keyof IBuyer] = `Отсутствует значение у поля ${translatedFields.get(key)}`;
             }
         }
         return errors;

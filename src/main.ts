@@ -69,7 +69,7 @@ console.log('Информация о пользователе после очи�
 // GET-запрос
 const apiClient = new ApiQuery(api);
 
-apiClient.get()
+apiClient.getProducts()
     .then(data => {
         console.log('Ответ на GET-запрос: ', data);
         products.setItems(data.items);
@@ -90,6 +90,6 @@ const makeOrder: TOrderData = {
 } 
 
 // POST-запрос
-apiClient.post(makeOrder)
+apiClient.postOrder(makeOrder)
     .then(response => console.log('Ответ на POST-запрос: ', response))
     .catch(error => console.log(`Ошибка при выполнении POST-запроса: ${error}`));

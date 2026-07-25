@@ -7,11 +7,11 @@ export class ApiQuery {
         this._api = _api;
     }
 
-    public get(): Promise<TGetProductsData> {
+    public getProducts(): Promise<TGetProductsData> {
         return this._api.get<TGetProductsData>('/product/');
     }
 
-    public post(orderInfo: TOrderData): Promise<TOrderResponse> {
+    public postOrder(orderInfo: TOrderData): Promise<TOrderResponse> {
         return this._api.post<TOrderResponse>('/order/', orderInfo);
     }
 }
