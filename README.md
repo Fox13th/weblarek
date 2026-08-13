@@ -188,3 +188,45 @@ Presenter - презентер содержит основную логику п
 `getProducts(): Promise<TGetProductsData>` - получает с сервера объект с массивом товаров. `TGetProductsData` - тип возвращаемого объекта;
 `postOrder(orderInfo: TOrderData): Promise<TOrderResponse>` - отправляет на сервер данные о покупателе и выбранных товарах. `TOrderData` - тип принимаемого объекта; `TOrderResponse` - тип принимаемого объекта.
 
+### Слой Представления (View)
+
+#### Класс Header
+Отвечает за отображении секции Header
+Использует интерфейс `IHeader` c полем `counter: number`
+
+Конструктор:
+`constructor(protected events: IEvents, container: HTMLElement)` - поиск и сохранение элементов корзины 
+
+Поля класса:
+`basketButton: HTMLButtonElement` - кнопка "Корзина"
+`counterElement: HTMLElemnt` - счётчик товаров
+
+Методы:
+`set counter(value: number)` - сеттер для счётчика таваров
+
+#### Класс Gallery
+Отвечает за отображении секции `main`
+Использует интерфейс `IGallery` c полем `catalog: HTMLElement`
+
+Конструктор:
+
+Поля класса:
+`catalogElement: HTMLElement` - элемент с галереи
+
+Методы:
+`set catalog(items: HTMLElement[])` - метод которые передает массив карточек
+
+#### Класс Modal
+Отвечает за отображение модального окна
+
+Конструктор:
+`constructor(protected event: IEvents, container: HTMLElement)` - ищет элементы и обрабатывает событие нажатия кнопки закрыть
+
+Поля класса:
+`contentElement: HTMLElement` - содержимое модального окна
+`closeElement: HTMLButtonElement` - кнопка "Закрыть"
+
+Методы:
+`set content(modalWnd: HTMLElement)` - вставка контента в модальное окно
+`open()` - открытие модального окна
+`close()` - закрытие модального окна

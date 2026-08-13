@@ -1,95 +1,207 @@
 import './scss/styles.scss';
 
 import { Products } from './components/Models/Products.ts';
-import { Basket } from './components/Models/Basket.ts';
+//import { Basket } from './components/Models/Basket.ts';
 import { Buyer } from './components/Models/Buyer.ts'; 
 import { Api } from './components/base/Api.ts';
+import { EventEmitter } from './components/base/Events.ts';
 import { ApiQuery } from './components/ApiQuery.ts';
 
-import { apiProducts } from './utils/data';
-import { IBuyer, TOrderData } from './types/index.ts';
-import { API_URL } from './utils/constants.ts';
+import { IBuyer, IProduct, TOrderData } from './types/index.ts';
+import { API_URL, CDN_URL } from './utils/constants.ts';
+import { Header } from './components/views/Header.ts';
+import { Modal } from './components/views/Modal.ts';
+import { ensureElement } from "./utils/utils";
+import { Gallery } from './components/views/Gallery.ts';
+import { CardCatalog } from './components/views/Cards/CardСatalog.ts';
+import { CardPreview } from './components/views/Cards/CardPreview.ts';
+import { Basket } from './components/views/Cards/Basket.ts';
+import { CardBasket } from './components/views/Cards/CardBasket.ts';
+import { FormOrder } from './components/views/Forms/FormOrder.ts';
 
+// Модели
 const products = new Products();
-const basket = new Basket();
+//const basket = new Basket();
 const api = new Api(API_URL);
 
-// Каталог
-products.setItems(apiProducts.items);
-console.log('Массив товаров из каталога: ', products.getItems());
+
+// Шаблоны
+const templateBasket = ensureElement<HTMLTemplateElement>('#basket');
+const templateCard = ensureElement<HTMLTemplateElement>('#card-catalog');
+const templateCardSelect = ensureElement<HTMLTemplateElement>('#card-preview');
+const templateCardBasket = ensureElement<HTMLTemplateElement>('#card-basket');
+const templateOrders = ensureElement<HTMLTemplateElement>('#order');
+const templateContacts = ensureElement<HTMLTemplateElement>('#contacts');
 
 
-const idProd = products.getProductById('c101ab44-ed99-4a54-990d-47aa2bb4e7d9');
-console.log('Товар по ID: ', idProd);
+const basket = templateBasket.content.firstElementChild?.cloneNode(true) as HTMLElement;
+const cardSelect = templateCardSelect.content.firstElementChild?.cloneNode(true) as HTMLElement;
+const cardBasketElem = templateCardBasket.content.firstElementChild?.cloneNode(true) as HTMLElement;
+const orderAddress = templateOrders.content.firstElementChild?.cloneNode(true) as HTMLElement;
+const orderContact = templateOrders.content.firstElementChild?.cloneNode(true) as HTMLElement;
 
-if (idProd) {
-    products.setSelectedProduct(idProd);
-}
-console.log('Выбранный товар из каталога: ', products.getSelectedProduct());
+// Контейнеры
+const headerContainer = ensureElement<HTMLElement>('.header__container');
+const galleryContainer = ensureElement<HTMLElement>('.gallery');
+const modalContainer = ensureElement<HTMLElement>('#modal-container');
+
+const events = new EventEmitter();
+
+const modal = new Modal(events, modalContainer);
+const header = new Header(events, headerContainer);
+
+let selectedItem: IProduct;
+
+const cardPreviewElement = templateCardSelect.content
+    .firstElementChild!
+    .cloneNode(true) as HTMLElement;
 
 
-// Корзина
-for (const item of apiProducts.items) {
-    basket.addProduct(item);
-}
-console.log('Массив товаров в корзине: ', basket.getProducts());
+const cardPreview = new CardPreview(events, cardPreviewElement);
 
-basket.removeProduct(apiProducts.items[1]);
-console.log('Массив товаров в корзине после удаления второго элемента: ', basket.getProducts());
+const order = new FormOrder(events, orderAddress);
+const contacts = new FormOrder(events, orderContact);
 
-console.log('Стоимость всех товаров в корзине: ', basket.getTotalPrice());
+const basketWnd = new Basket(events, basket);
+const cardElem = new CardBasket(events, cardBasketElem);
 
-console.log('Наличие товара в корзине по ID: ', basket.getProductById('b06cde61-912f-4663-9751-09956c0eed67'));
-
-basket.clear();
-console.log('Количество товаров в корзине после очистки: ', basket.countProducts()); 
-
-// Покупатель
-
-const buyerData: IBuyer = {
-    payment: 'card',
-    email: 'andrew@yandex.ru',
-    phone: '+79167777777',
-    address: ''
-}
-
-const buyer = new Buyer(buyerData);
-console.log('Найденные ошибки: ', buyer.isValid());
-
-const new_info = { address: 'Moscow'}
-buyer.setInfo(new_info);
-console.log('Найденные ошибки: ', buyer.isValid());
-
-console.log('Информация о пользователе: ', buyer.getInfo());
-
-buyer.clear();
-console.log('Информация о пользователе после очистки: ', buyer.getInfo());
-
-// Тесты на взаимодействие с сервером
-// GET-запрос
+// GET-запрос и отображение карточек =======================================================
 const apiClient = new ApiQuery(api);
 
 apiClient.getProducts()
     .then(data => {
-        console.log('Ответ на GET-запрос: ', data);
         products.setItems(data.items);
-        console.log('Массив товаров из каталога после GET-запроса: ', products.getItems());
+        products.getItems().forEach(product => {
+
+            const cardElement = templateCard.content.firstElementChild?.cloneNode(true) as HTMLElement;
+            
+            const card = new CardCatalog(cardElement, {
+                onClick: () => events.emit('card:select', product),
+            });
+
+            galleryContainer.append(
+                card.render({
+                    category: product.category,
+                    title: product.title,
+                    image: CDN_URL + product.image,
+                    price: product.price
+                })
+            );
+        })
     })
     .catch(error => console.log(`Ошибка при выполнении GET-запроса: ${error}`));
 
-const makeOrder: TOrderData = {
-    payment: "card", 
-    email: "test@test.ru", 
-    phone: "+71234567890",    
-    address: "Spb Vosstania 1",
-    total: 2200,
-    items: [
-        "854cef69-976d-4c2a-a18c-2aa45046c390",
-        "c101ab44-ed99-4a54-990d-47aa2bb4e7d9"
-    ]
-} 
+//===========================================================================================
 
-// POST-запрос
-apiClient.postOrder(makeOrder)
-    .then(response => console.log('Ответ на POST-запрос: ', response))
-    .catch(error => console.log(`Ошибка при выполнении POST-запроса: ${error}`));
+events.on('modal:close', () => {
+    modal.close();
+});
+
+events.on('card:select', (product: IProduct) => {
+
+    selectedItem = product;
+
+    cardPreview.render({
+        category: product.category,
+        title: product.title,
+        image: CDN_URL + product.image,
+        price: product.price,
+        description: product.description
+    });
+
+    modal.render({
+        content: cardPreview.render()
+    });
+
+    modal.open();
+})
+
+
+events.on('basket:open', () => {
+
+    basketWnd.items = basketItems;
+
+    basketWnd.render({
+        price: totalPrice
+    });
+
+    modal.render({
+        content: basketWnd.render()
+    });
+
+    modal.open();
+});
+
+
+const basketItems: HTMLElement[] = [];
+let countItems: number = 0;
+let totalPrice: number = 0;
+
+events.on('card:buy', () => {
+    const cardElement = templateCardBasket.content
+    .firstElementChild!
+    .cloneNode(true) as HTMLElement;
+
+    const card = new CardBasket(events, cardElement);
+
+    countItems = countItems + 1;
+    header.render({
+        counter: countItems
+    })
+
+    card.render({
+        index: basketItems.length + 1,
+        title: selectedItem.title,
+        price: selectedItem.price
+    });
+
+    basketItems.push(card.render());
+    totalPrice = totalPrice + (selectedItem.price ?? 0);
+
+    basketWnd.items = basketItems;
+
+    modal.close();
+});
+
+events.on('basket:delete', (product: { element: HTMLElement , price: number}) => {
+
+    const index = basketItems.indexOf(product.element);
+    basketItems.splice(index, 1);
+    
+    basketItems.forEach((item, index) => {
+        const numberElement = ensureElement<HTMLElement>(
+            '.basket__item-index',
+            item
+        );
+
+        numberElement.textContent = String(index + 1);
+    })
+    
+    basketWnd.items = basketItems;
+
+    totalPrice = totalPrice - (product.price ?? 0);
+
+    modal.render({
+        content: basketWnd.render({
+            price: totalPrice
+        })
+    });
+
+    countItems = countItems - 1;
+    header.render({
+        counter: countItems
+    });
+
+});
+
+events.on('basket:form', () => {
+    modal.render({
+        content: order.render()
+    });
+});
+
+events.on('form:buy', () => {
+    modal.render({
+        content: contacts.render()
+    });
+});
