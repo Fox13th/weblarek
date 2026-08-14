@@ -56,7 +56,8 @@ export class FormOrder extends Form<TFormOrder> {
             this.orderButtonElement.disabled = checkForm(this.addressElement, this.paymentMethod);
         });
 
-        this.orderButtonElement.addEventListener('click', () => {
+        this.orderButtonElement.addEventListener('click', (event) => {
+            event.preventDefault();
             this.event.emit('form:next');
         })
 

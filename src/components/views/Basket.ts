@@ -1,11 +1,6 @@
-import { IProduct } from "../../../types";
-import { categoryMap } from "../../../utils/constants";
-import { ensureElement } from "../../../utils/utils";
-import { Component } from "../../base/Component";
-import { IEvents } from "../../base/Events";
-import { Card } from "./Card";
-
-//type CategoryKey = keyof typeof categoryMap;
+import { ensureElement } from "../../utils/utils";
+import { Component } from "../base/Component";
+import { IEvents } from "../base/Events";
 
 export interface IBasket {
     list: HTMLElement;

@@ -10,15 +10,8 @@ export abstract class Card<T> extends Component<T> {
     constructor(container: HTMLElement) {
         super(container);
 
-        this.titleElement = ensureElement<HTMLElement>(
-            '.card__title',
-            this.container
-        );
-
-        this.priceElement = ensureElement<HTMLElement>(
-            '.card__price',
-            this.container
-        );
+        this.titleElement = ensureElement<HTMLElement>('.card__title', this.container);
+        this.priceElement = ensureElement<HTMLElement>('.card__price', this.container);
 
         const priceText = this.priceElement.textContent?.trim();
         if (priceText) {

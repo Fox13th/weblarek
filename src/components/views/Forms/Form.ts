@@ -8,10 +8,7 @@ export abstract class Form<T> extends Component<T> {
     constructor(container: HTMLElement){
         super(container);
 
-        this.errorElement = ensureElement<HTMLElement>(
-            '.form__errors',
-            this.container
-        );
+        this.errorElement = ensureElement<HTMLElement>('.form__errors', this.container);
     }
 
     set error(value: string) {

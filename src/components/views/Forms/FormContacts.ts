@@ -7,7 +7,7 @@ export type TFormContact = Pick<IBuyer, 'email' | 'phone'>  & {
     error: number;
 };
 
-function checkAddress(inputField: HTMLInputElement, field: string) {
+function checkInput(inputField: HTMLInputElement, field: string) {
     if (inputField.value.trim() === '') {
         return `Необходимо указать ${field}`;
     }
@@ -15,7 +15,7 @@ function checkAddress(inputField: HTMLInputElement, field: string) {
 }
 
 function checkForm(inputFieldEmail: HTMLInputElement, inputFieldPhone: HTMLInputElement, field: string): boolean {
-    return checkAddress(inputFieldEmail, field) !== '' && checkAddress(inputFieldPhone, field) !== '';
+    return checkInput(inputFieldEmail, field) !== '' || checkInput(inputFieldPhone, field) !== '';
 }
 
 
@@ -34,18 +34,19 @@ export class FormContact extends Form<TFormContact> {
         this.buyButtonElement = ensureElement<HTMLButtonElement>('.button', this.container);
 
         this.emailElement.addEventListener('input', () => {
-            this.error = checkAddress(this.emailElement, 'Email');
+            this.error = checkInput(this.emailElement, 'Email');
             
             this.buyButtonElement.disabled = checkForm(this.emailElement, this.phoneElement, 'Email');
         });
 
         this.phoneElement.addEventListener('input', () => {
-            this.error = checkAddress(this.phoneElement, 'Телефон');
+            this.error = checkInput(this.phoneElement, 'Телефон');
             this.buyButtonElement.disabled = checkForm(this.phoneElement, this.emailElement, 'Телефон');
         });
 
-        this.buyButtonElement.addEventListener('click', () => {
-            this.event.emit('form:buy');
+        this.buyButtonElement.addEventListener('click', (event) => {
+            event.preventDefault();
+            this.event.emit('form:success');
         })
 
     }
