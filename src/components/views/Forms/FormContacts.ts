@@ -23,8 +23,6 @@ export class FormContact extends Form<TFormContact> {
     protected emailElement: HTMLInputElement;
     protected phoneElement: HTMLInputElement;
     protected buyButtonElement: HTMLButtonElement;
-    protected paymentMethod: string = '';
-
 
     constructor(protected event: IEvents, container: HTMLElement) {
         super(container);

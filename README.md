@@ -209,6 +209,7 @@ Presenter - презентер содержит основную логику п
 Использует интерфейс `IGallery` c полем `catalog: HTMLElement`
 
 Конструктор:
+`constructor(container: HTMLElement)` - поиск элемента галереи
 
 Поля класса:
 `catalogElement: HTMLElement` - элемент с галереи
@@ -230,3 +231,135 @@ Presenter - презентер содержит основную логику п
 `set content(modalWnd: HTMLElement)` - вставка контента в модальное окно
 `open()` - открытие модального окна
 `close()` - закрытие модального окна
+
+#### Класс Basket
+Отвечает за отображение элементов в корзине
+
+Конструктор
+`constructor(protected event: IEvents, container: HTMLElement)` - поиск элементов и обработка кнопки "Оформить"
+
+Поля класса:
+`basketList: HTMLElement` - список товаров в корзине
+`basketPrice: HTMLElement` - общая цена за все товары в корзине
+`formButton: HTMLButtonElement` - кнопка "Оформить"
+
+Методы класса:
+`set items(itemList: HTMLElement[])` - определение списка товаров
+`set price(value: number)` - определение общей цены товаров
+
+
+#### Абстрактный класс Card
+Абстрактный класс карточки товара
+
+Конструктор:
+`constructor(container: HTMLElement)` - поиск элементов карточки
+
+Поля класса:
+`titleElement: HTMLElement` - элемент названия товара
+`priceElement: HTMLElement` - элемент цены товара
+`priceValue: number | null = null` - цена товара
+
+Методы класса:
+`set title(value: string)` - указать название
+`set price(value: number | null)` - указать цену
+`get price(): number | null` - получение цены
+
+#### Класс CardBasket
+Отвечает за карточки товаров в корзине
+
+Конструктор класса:
+`constructor(protected event: IEvents, container: HTMLElement)` - поиск элементов и обработка кнопки "Удалить"
+
+Поля класса:
+`numberElem: HTMLElement` - элемент порядкового номера в корзине
+`cardDeleteButtom: HTMLButtonElement` - кнопка удаления элемента из корзины
+`indexElem: number` - индекс элемента
+
+Методы класса:
+`set index(value: number)`
+`get index()`
+
+#### Класс CardPreview
+Отвечает за просмотр карточки после клика на ней
+
+Конструктор класса:
+`constructor(protected event: IEvents, container: HTMLElement)` - поиск элементов и обработки кнопки "В корзину"
+
+Поля класса:    
+`imageElement: HTMLImageElement` - 
+`categoryElement: HTMLElement` -
+`describeElement: HTMLElement` -
+`buyButtonElement: HTMLButtonElement` -
+
+Методы класса:
+`set image(value: string)` - указать изображение 
+`set category(value: string)` - указать категорию
+`set description(value: string)` - указать описание
+
+#### Класс CardCatalog
+Отвечает за карточки в каталоге товаров
+
+Конструктор класса:
+`constructor(container: HTMLElement, actions?: ICardActions)` - поиск элементов карточки в каталоге и обработка нажатия на саму карточку
+
+Поля класса:
+`imageElement: HTMLImageElement` - элемент изображения
+`categoryElement: HTMLElement` - элемент категории
+
+Методы класса:
+`set category(value: string)`- указать категорию
+`set image(value: string)` - установить изображение
+
+
+
+import { ensureElement } from "../../../utils/utils";
+import { Component } from "../../base/Component";
+
+#### Абстрактный класс Form
+Абстрактный класс форм оплаты товаров
+
+Конструктор класса:
+`constructor(container: HTMLElement)` - поиск элементов
+
+Поля класса:
+`errorElement: HTMLElement` - элемент текста ошибки
+
+Методы класса:
+`set error(value: string)` - указать ошибку ввода данных
+
+#### Класс FormOrder
+Отвечает за форму, где выбирается метод оплаты и вводится адрес покупателя
+
+`constructor(protected event: IEvents, container: HTMLElement)` - поиск элементов, проверка введенных данных и обработка кнопок "Далее" и способов оплаты
+
+Поля класса:
+`paymentCardElement: HTMLButtonElement` - кнопка способа оплаты картой
+`paymentCashElement: HTMLButtonElement` - кнопка способа оплаты наличными
+`addressElement: HTMLInputElement` - элемент ввода поля адреса
+`orderButtonElement: HTMLButtonElement` - кнопка "Далее"
+`paymentMethod: string` - выбранный способ оплаты
+
+
+#### Класс FormContact
+Отвечает за форму, где заполняются контактные данные покупателя - Email и телефон
+
+`сonstructor(protected event: IEvents, container: HTMLElement)` - поиск элементов, проверка введенных данных и обработка кнопки "Оплатить"
+
+Поля класса:
+`emailElement: HTMLInputElement` - поле Email
+`phoneElement: HTMLInputElement` - поле Телофон
+`buyButtonElement: HTMLButtonElement` - кнопка "Оплатить"
+
+
+#### Класс ClassSuccess
+Отвечает за вывод форму успешной оплаты
+
+Конструктор класса:
+`constructor(protected event: IEvents, container: HTMLElement)` - поиск элементов и обработка кнопки "За новыми покупками"
+
+Поля класса:
+`totalPriceElement: HTMLElement` - Итоговая цена заказа
+`closeButtonElement: HTMLButtonElement` - кнопка "За новыми покупками"
+
+Методы класса:
+`set total(value: number)` - указать общую цену заказа
