@@ -126,7 +126,7 @@ Presenter - презентер содержит основную логику п
 Осуществляет хранение товаров, которые можно купить в приложении.
 
 Конструктор: 
-`constructor(products: IProduct[] = [])` - контруктор опционально принимает начальный массив товаров. По умолчанию пустой массив
+`constructor(protected event: IEvents, products: IProduct[] = [])` - контруктор опционально принимает начальный массив товаров. По умолчанию пустой массив
 
 Поля класса: 
 `products: IProduct[]` - массив товаров
@@ -143,7 +143,7 @@ Presenter - презентер содержит основную логику п
 Осуществляет хранение товаров, которые пользователь выбрал для покупки.
 
 Конструтор:
-`constructor(selectedProducts: IProduct[] = [])` - конструктор принимает массив выбранных товаров. По умолчанию пустой массив.
+`constructor(protected event: IEvents, selectedProducts: IProduct[] = [])` - конструктор принимает массив выбранных товаров. По умолчанию пустой массив.
 
 Поля класса:
 `selectedProducts: IProduct[]` - массив выбранных товаров.
@@ -161,7 +161,7 @@ Presenter - презентер содержит основную логику п
 Осуществляет хранение данных покупателя, которые тот должен указать при оформлении заказа.
 
 Конструктор:
-`constructor(initialBuyer?: IBuyer)` -  конструктор принимает начального покупателя.
+`constructor(protected event: IEvents, initialBuyer?: IBuyer)` -  конструктор принимает начального покупателя.
 
 Поля класса:
 `buyer: IBuyer` - данные покупателя: вид оплаты, адреc, телефон, email.
@@ -325,7 +325,8 @@ import { Component } from "../../base/Component";
 `errorElement: HTMLElement` - элемент текста ошибки
 
 Методы класса:
-`set error(value: string)` - указать ошибку ввода данных
+`set error(value: string)` - указать ошибку ввода 
+`checkInput(inputField: HTMLInputElement, field: string)` - проверяет заполнено ли поле ввода
 
 #### Класс FormOrder
 Отвечает за форму, где выбирается метод оплаты и вводится адрес покупателя
@@ -339,6 +340,9 @@ import { Component } from "../../base/Component";
 `orderButtonElement: HTMLButtonElement` - кнопка "Далее"
 `paymentMethod: string` - выбранный способ оплаты
 
+Методы класса:
+`checkForm(address: HTMLInputElement, payment: string): boolean` - проверяет заполнение поля для активации кнопки "Далее"
+
 
 #### Класс FormContact
 Отвечает за форму, где заполняются контактные данные покупателя - Email и телефон
@@ -349,6 +353,9 @@ import { Component } from "../../base/Component";
 `emailElement: HTMLInputElement` - поле Email
 `phoneElement: HTMLInputElement` - поле Телофон
 `buyButtonElement: HTMLButtonElement` - кнопка "Оплатить"
+
+Методы класса:
+`checkForm(inputFieldEmail: HTMLInputElement, inputFieldPhone: HTMLInputElement): boolean` - Проверка полей для активации кнопки "Оплатить"
 
 
 #### Класс ClassSuccess
@@ -363,3 +370,30 @@ import { Component } from "../../base/Component";
 
 Методы класса:
 `set total(value: number)` - указать общую цену заказа
+
+### Слой Презентера
+Презентер связывает модели данных и представления через систему событий (`EventEmitter`), обрабатывает пользовательские действия и обновляет интерфейс при изменении состояния моделей.
+
+`products:changed` - изменение и вывод товаров
+
+`modal:close` - закрытие модального окна
+
+`card:select` - выбранный продукт
+
+`product:selected` - карточка выбранного товара
+
+`basket:open` - открытие корзины
+
+`card:buy` - выбор товара в корзину для покупки
+
+`basket:changed` - изменение состояния корзины
+
+`basket:delete` - удаление товара из корзины
+
+`basket:form` - Оформление покупки товаров в корзине
+
+`form:next` - ввода данных пользователя способ оплаты и адрес
+ 
+`form:success` - последний шаг ввода данных пользователя email и phone и завершение покупки
+
+`success:close` - закрытие формы успешной оплаты и очистка корзины

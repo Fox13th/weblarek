@@ -5,23 +5,34 @@ import { Api } from './components/base/Api.ts';
 import { EventEmitter } from './components/base/Events.ts';
 import { ApiQuery } from './components/ApiQuery.ts';
 
-import { IProduct } from './types/index.ts';
+import { IProduct, TPayment } from './types/index.ts';
 import { API_URL, CDN_URL } from './utils/constants.ts';
 import { Header } from './components/views/Header.ts';
 import { Modal } from './components/views/Modal.ts';
 import { ensureElement } from "./utils/utils";
 import { CardCatalog } from './components/views/Cards/CardСatalog.ts';
 import { CardPreview } from './components/views/Cards/CardPreview.ts';
-import { Basket } from './components/views/Basket.ts';
+import { BasketView } from './components/views/Basket.ts';
 import { CardBasket } from './components/views/Cards/CardBasket.ts';
 import { FormOrder } from './components/views/Forms/FormOrder.ts';
 import { FormContact } from './components/views/Forms/FormContacts.ts';
 import { ClassSuccess } from './components/views/Success.ts';
+import { Basket } from './components/Models/Basket.ts';
+import { Buyer } from './components/Models/Buyer.ts';
 
-const products = new Products();
+const events = new EventEmitter();
+
+const products = new Products(events);
+const basketModel = new Basket(events);
+const buyerModel = new Buyer(events, {
+    payment: '',
+    address: '',
+    email: '',
+    phone: ''
+});
+
 const api = new Api(API_URL);
 const apiClient = new ApiQuery(api);
-const events = new EventEmitter();
 
 const headerContainer = ensureElement<HTMLElement>('.header__container');
 const galleryContainer = ensureElement<HTMLElement>('.gallery');
@@ -44,46 +55,52 @@ const orderSuccess = templateSuccess.content.firstElementChild?.cloneNode(true) 
 const header = new Header(events, headerContainer);
 const modal = new Modal(events, modalContainer);
 const cardPreview = new CardPreview(events, cardPreviewElement);
-const basketWnd = new Basket(events, basket);
+const basketWnd = new BasketView(events, basket);
 const order = new FormOrder(events, orderAddress);
 const contacts = new FormContact(events, orderContact);
 const success = new ClassSuccess(events, orderSuccess);
 
-let selectedItem: IProduct;
-const basketItems: HTMLElement[] = [];
-let countItems: number = 0;
-let totalPrice: number = 0;
-
 apiClient.getProducts()
     .then(data => {
         products.setItems(data.items);
-        products.getItems().forEach(product => {
-
-            const cardElement = templateCard.content.firstElementChild?.cloneNode(true) as HTMLElement;
-            
-            const card = new CardCatalog(cardElement, {
-                onClick: () => events.emit('card:select', product),
-            });
-
-            galleryContainer.append(
-                card.render({
-                    category: product.category,
-                    title: product.title,
-                    image: CDN_URL + product.image,
-                    price: product.price
-                })
-            );
-        })
+        
     })
     .catch(error => console.log(`Ошибка при выполнении GET-запроса: ${error}`));
+
+events.on('products:changed', () => {
+    products.getItems().forEach(product => {
+
+        const cardElement = templateCard.content.firstElementChild?.cloneNode(true) as HTMLElement;
+            
+        const card = new CardCatalog(cardElement, {
+            onClick: () => events.emit('card:select', product),
+        });
+
+        galleryContainer.append(
+            card.render({
+                category: product.category,
+                title: product.title,
+                image: CDN_URL + product.image,
+                price: product.price
+            })
+        );
+    })
+});
 
 events.on('modal:close', () => {
     modal.close();
 });
 
 events.on('card:select', (product: IProduct) => {
+    products.setSelectedProduct(product);
+})
 
-    selectedItem = product;
+events.on('product:selected', () => {
+    const product = products.getSelectedProduct();
+
+    if (!product) {
+        return;
+    }
 
     cardPreview.render({
         category: product.category,
@@ -98,16 +115,9 @@ events.on('card:select', (product: IProduct) => {
     });
 
     modal.open();
-})
+});
 
 events.on('basket:open', () => {
-
-    basketWnd.items = basketItems;
-
-    basketWnd.render({
-        price: totalPrice
-    });
-
     modal.render({
         content: basketWnd.render()
     });
@@ -116,60 +126,47 @@ events.on('basket:open', () => {
 });
 
 events.on('card:buy', () => {
-    const cardElement = templateCardBasket.content
-    .firstElementChild!
-    .cloneNode(true) as HTMLElement;
+    const product = products.getSelectedProduct();
 
-    const card = new CardBasket(events, cardElement);
+    if (!product) {
+        return;
+    }
 
-    countItems = countItems + 1;
-    header.render({
-        counter: countItems
-    })
-
-    card.render({
-        index: basketItems.length + 1,
-        title: selectedItem.title,
-        price: selectedItem.price
-    });
-
-    basketItems.push(card.render());
-    totalPrice = totalPrice + (selectedItem.price ?? 0);
-
-    basketWnd.items = basketItems;
-
+    basketModel.addProduct(product);
     modal.close();
 });
 
-events.on('basket:delete', (product: { element: HTMLElement , price: number}) => {
+events.on('basket:changed', () => {
 
-    const index = basketItems.indexOf(product.element);
-    basketItems.splice(index, 1);
-    
-    basketItems.forEach((item, index) => {
-        const numberElement = ensureElement<HTMLElement>(
-            '.basket__item-index',
-            item
-        );
+    const products = basketModel.getProducts();
 
-        numberElement.textContent = String(index + 1);
-    })
-    
-    basketWnd.items = basketItems;
+    const items = products.map((product, index) => {
+        const cardElement = templateCardBasket.content
+            .firstElementChild!
+            .cloneNode(true) as HTMLElement;
 
-    totalPrice = totalPrice - (product.price ?? 0);
+        const card = new CardBasket(events, cardElement, product);
 
-    modal.render({
-        content: basketWnd.render({
-            price: totalPrice
-        })
+        return card.render({
+            index: index + 1,
+            title: product.title,
+            price: product.price
+        });
     });
 
-    countItems = countItems - 1;
+    basketWnd.items = items;
+
     header.render({
-        counter: countItems
+        counter: basketModel.countProducts()
     });
 
+    basketWnd.render({
+        price: basketModel.getTotalPrice()
+    });
+})
+
+events.on('basket:delete', ({ product }: { product: IProduct }) => {
+    basketModel.removeProduct(product);
 });
 
 events.on('basket:form', () => {
@@ -178,30 +175,25 @@ events.on('basket:form', () => {
     });
 });
 
-events.on('form:next', () => {
+events.on('form:next', (data: { payment: TPayment; address: string; }) => {
+    buyerModel.setInfo(data);
+
     modal.render({
         content: contacts.render()
     });
 });
 
-events.on('form:success', () => {
+events.on('form:success', (data: { email: string; phone: string;}) => {
+    buyerModel.setInfo(data);
+
     modal.render({
         content: success.render({
-            total: totalPrice
+            total: basketModel.getTotalPrice()
         })
     });
 });
 
 events.on('success:close', () => {
-    basketItems.length = 0;
-    basketWnd.items = basketItems;
-    basketWnd.render({
-        price: 0
-    });
-    totalPrice = 0;
-    countItems = 0;
-    header.render({
-        counter: countItems
-    });
+    basketModel.clear();
     modal.close();
 });

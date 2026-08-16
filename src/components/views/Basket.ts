@@ -8,7 +8,7 @@ export interface IBasket {
 }
 
 
-export class Basket extends Component<IBasket> {
+export class BasketView extends Component<IBasket> {
     protected basketList: HTMLElement;
     protected basketPrice: HTMLElement;
     protected formButton: HTMLButtonElement;

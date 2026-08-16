@@ -7,18 +7,6 @@ export type TFormContact = Pick<IBuyer, 'email' | 'phone'>  & {
     error: number;
 };
 
-function checkInput(inputField: HTMLInputElement, field: string) {
-    if (inputField.value.trim() === '') {
-        return `Необходимо указать ${field}`;
-    }
-    return '';
-}
-
-function checkForm(inputFieldEmail: HTMLInputElement, inputFieldPhone: HTMLInputElement, field: string): boolean {
-    return checkInput(inputFieldEmail, field) !== '' || checkInput(inputFieldPhone, field) !== '';
-}
-
-
 export class FormContact extends Form<TFormContact> {
     protected emailElement: HTMLInputElement;
     protected phoneElement: HTMLInputElement;
@@ -32,21 +20,24 @@ export class FormContact extends Form<TFormContact> {
         this.buyButtonElement = ensureElement<HTMLButtonElement>('.button', this.container);
 
         this.emailElement.addEventListener('input', () => {
-            this.error = checkInput(this.emailElement, 'Email');
+            this.error = this.checkInput(this.emailElement, 'Email');
             
-            this.buyButtonElement.disabled = checkForm(this.emailElement, this.phoneElement, 'Email');
+            this.buyButtonElement.disabled = this.checkForm(this.emailElement, this.phoneElement);
         });
 
         this.phoneElement.addEventListener('input', () => {
-            this.error = checkInput(this.phoneElement, 'Телефон');
-            this.buyButtonElement.disabled = checkForm(this.phoneElement, this.emailElement, 'Телефон');
+            this.error = this.checkInput(this.phoneElement, 'Телефон');
+            this.buyButtonElement.disabled = this.checkForm(this.emailElement, this.phoneElement);
         });
 
         this.buyButtonElement.addEventListener('click', (event) => {
             event.preventDefault();
-            this.event.emit('form:success');
+            this.event.emit('form:success', { email: this.emailElement.value, phone: this.phoneElement.value });
         })
+    }
 
+    protected checkForm(inputFieldEmail: HTMLInputElement, inputFieldPhone: HTMLInputElement): boolean {
+        return this.checkInput(inputFieldEmail, 'Email') !== '' || this.checkInput(inputFieldPhone, 'Телефон') !== '';
     }
 
 }

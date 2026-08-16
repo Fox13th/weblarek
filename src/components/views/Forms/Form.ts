@@ -11,6 +11,13 @@ export abstract class Form<T> extends Component<T> {
         this.errorElement = ensureElement<HTMLElement>('.form__errors', this.container);
     }
 
+    protected checkInput(inputField: HTMLInputElement, field: string) {
+        if (inputField.value.trim() === '') {
+            return `Необходимо указать ${field}`;
+        }
+        return '';
+    }
+
     set error(value: string) {
         this.errorElement.textContent = value;
     }

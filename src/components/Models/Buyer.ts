@@ -1,10 +1,11 @@
 import { IBuyer, ValidError } from '../../types/index.ts';
+import { IEvents } from '../base/Events.ts';
 
 export class Buyer {
 
     private buyer: Partial<IBuyer>;
 
-    constructor(buyer: IBuyer) {
+    constructor(protected event: IEvents, buyer: IBuyer) {
         this.buyer = {...buyer};
     }
 
