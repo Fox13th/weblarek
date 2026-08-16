@@ -14,7 +14,7 @@ export class Products {
     public setItems(products: IProduct[]): void {
         this.products = [...products];
         this.selectedProduct = null;
-        this.event.emit('products:changed');
+        this.event.emit('catalog:changed');
     }
 
     public getItems():  IProduct[] {

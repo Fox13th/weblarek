@@ -13,12 +13,14 @@ import { ensureElement } from "./utils/utils";
 import { CardCatalog } from './components/views/Cards/CardСatalog.ts';
 import { CardPreview } from './components/views/Cards/CardPreview.ts';
 import { BasketView } from './components/views/Basket.ts';
+import { Gallery } from './components/views/Gallery.ts';
 import { CardBasket } from './components/views/Cards/CardBasket.ts';
 import { FormOrder } from './components/views/Forms/FormOrder.ts';
 import { FormContact } from './components/views/Forms/FormContacts.ts';
 import { ClassSuccess } from './components/views/Success.ts';
 import { Basket } from './components/Models/Basket.ts';
 import { Buyer } from './components/Models/Buyer.ts';
+
 
 const events = new EventEmitter();
 
@@ -54,6 +56,7 @@ const orderSuccess = templateSuccess.content.firstElementChild?.cloneNode(true) 
 
 const header = new Header(events, headerContainer);
 const modal = new Modal(events, modalContainer);
+const gallery = new Gallery(galleryContainer);
 const cardPreview = new CardPreview(events, cardPreviewElement);
 const basketWnd = new BasketView(events, basket);
 const order = new FormOrder(events, orderAddress);
@@ -67,8 +70,8 @@ apiClient.getProducts()
     })
     .catch(error => console.log(`Ошибка при выполнении GET-запроса: ${error}`));
 
-events.on('products:changed', () => {
-    products.getItems().forEach(product => {
+events.on('catalog:changed', () => {
+    const cards = products.getItems().map(product => {
 
         const cardElement = templateCard.content.firstElementChild?.cloneNode(true) as HTMLElement;
             
@@ -76,15 +79,17 @@ events.on('products:changed', () => {
             onClick: () => events.emit('card:select', product),
         });
 
-        galleryContainer.append(
-            card.render({
-                category: product.category,
-                title: product.title,
-                image: CDN_URL + product.image,
-                price: product.price
-            })
-        );
-    })
+        return card.render({
+            category: product.category,
+            title: product.title,
+            image: CDN_URL + product.image,
+            price: product.price
+        });
+    });
+
+    gallery.render({
+        catalog: cards
+    });
 });
 
 events.on('modal:close', () => {
@@ -107,7 +112,9 @@ events.on('product:selected', () => {
         title: product.title,
         image: CDN_URL + product.image,
         price: product.price,
-        description: product.description
+        description: product.description,
+        isExist: basketModel.getProductById(product.id),
+        isAvailable: product.price !== null
     });
 
     modal.render({
@@ -131,8 +138,13 @@ events.on('card:buy', () => {
     if (!product) {
         return;
     }
+    
+    if (basketModel.getProductById(product.id)) {
+        basketModel.removeProduct(product);
+    } else {
+        basketModel.addProduct(product);
+    }
 
-    basketModel.addProduct(product);
     modal.close();
 });
 
@@ -183,7 +195,7 @@ events.on('form:next', (data: { payment: TPayment; address: string; }) => {
     });
 });
 
-events.on('form:success', (data: { email: string; phone: string;}) => {
+events.on('form:success', (data: { email: string; phone: string; }) => {
     buyerModel.setInfo(data);
 
     modal.render({
