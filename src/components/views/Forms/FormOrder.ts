@@ -1,4 +1,4 @@
-import { IBuyer } from "../../../types";
+import { IBuyer, TPayment } from "../../../types";
 import { Form } from "./Form";
 import { IEvents } from "../../base/Events";
 import { ensureElement } from "../../../utils/utils";
@@ -12,7 +12,7 @@ export class FormOrder extends Form<TFormOrder> {
     protected paymentCashElement: HTMLButtonElement;
     protected addressElement: HTMLInputElement;
     protected orderButtonElement: HTMLButtonElement;
-    protected paymentMethod: string = '';
+    protected paymentMethod: TPayment | '' = '';
 
 
     constructor(protected event: IEvents, container: HTMLElement) {
@@ -40,7 +40,7 @@ export class FormOrder extends Form<TFormOrder> {
         });
 
         this.addressElement.addEventListener('input', () => {
-            this.error = this.checkInput(this.addressElement, 'Метод оплаты');
+            this.error = this.checkInput(this.addressElement, 'Адрес');
             this.orderButtonElement.disabled = this.checkForm(this.addressElement, this.paymentMethod);
         });
 
@@ -51,7 +51,7 @@ export class FormOrder extends Form<TFormOrder> {
 
     }
 
-    protected checkForm(address: HTMLInputElement, payment: string): boolean {
+    protected checkForm(address: HTMLInputElement, payment: TPayment | ''): boolean {
         return this.checkInput(address, 'Адрес') !== '' || payment === '';
     }
 

@@ -205,7 +205,6 @@ events.on('form:success', (data: { email: string; phone: string; }) => {
         console.log(errors);
         return;
     }
-    console.log('adasda');
 
     const buyer = buyerModel.getInfo();
 
