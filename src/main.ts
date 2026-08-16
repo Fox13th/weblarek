@@ -107,7 +107,7 @@ events.on('product:selected', () => {
         return;
     }
 
-    cardPreview.render({
+    const content = cardPreview.render({
         category: product.category,
         title: product.title,
         image: CDN_URL + product.image,
@@ -118,7 +118,7 @@ events.on('product:selected', () => {
     });
 
     modal.render({
-        content: cardPreview.render()
+        content: content
     });
 
     modal.open();
@@ -150,9 +150,9 @@ events.on('card:buy', () => {
 
 events.on('basket:changed', () => {
 
-    const products = basketModel.getProducts();
+    const basketProducts = basketModel.getProducts();
 
-    const items = products.map((product, index) => {
+    const items = basketProducts.map((product, index) => {
         const cardElement = templateCardBasket.content
             .firstElementChild!
             .cloneNode(true) as HTMLElement;
@@ -175,6 +175,14 @@ events.on('basket:changed', () => {
     basketWnd.render({
         price: basketModel.getTotalPrice()
     });
+
+    const selectedProduct = products.getSelectedProduct();
+
+    if (selectedProduct) {
+        cardPreview.render({
+            isExist: basketModel.getProductById(selectedProduct.id)
+        });
+    }
 })
 
 events.on('basket:delete', ({ product }: { product: IProduct }) => {
