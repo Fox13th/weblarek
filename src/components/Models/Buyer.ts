@@ -11,6 +11,7 @@ export class Buyer {
 
     public setInfo(partialData: Partial<IBuyer>): void {
         this.buyer = {...this.buyer, ...partialData};
+        this.event.emit('buyer:change');
     }
 
     public getInfo(): Partial<IBuyer> {
@@ -19,6 +20,7 @@ export class Buyer {
 
     public clear(): void {
         this.buyer = {};
+        this.event.emit('buyer:change');
     }
 
     public isValid(): ValidError {      

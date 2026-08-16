@@ -5,7 +5,7 @@ import { Api } from './components/base/Api.ts';
 import { EventEmitter } from './components/base/Events.ts';
 import { ApiQuery } from './components/ApiQuery.ts';
 
-import { IProduct, TPayment } from './types/index.ts';
+import { IProduct, TOrderData, TPayment } from './types/index.ts';
 import { API_URL, CDN_URL } from './utils/constants.ts';
 import { Header } from './components/views/Header.ts';
 import { Modal } from './components/views/Modal.ts';
@@ -197,15 +197,48 @@ events.on('form:next', (data: { payment: TPayment; address: string; }) => {
 
 events.on('form:success', (data: { email: string; phone: string; }) => {
     buyerModel.setInfo(data);
+    
+    const errors = buyerModel.isValid();
+    
 
-    modal.render({
-        content: success.render({
-            total: basketModel.getTotalPrice()
-        })
+    if (Object.keys(errors).length > 0) {
+        console.log(errors);
+        return;
+    }
+    console.log('adasda');
+
+    const buyer = buyerModel.getInfo();
+
+    const orderData: TOrderData = {
+        payment: buyer.payment as TPayment,
+        email: buyer.email as string,
+        phone: buyer.phone as string,
+        address: buyer.address as string,
+        total: basketModel.getTotalPrice(),
+        items: basketModel.getProducts().map(product => product.id)
+    };
+
+    apiClient.postOrder(orderData).then((response) => {
+        basketModel.clear();
+        buyerModel.clear();
+
+        modal.render({
+            content: success.render({
+                total: response.total
+            })
+        });
+    }).catch(error => {
+        console.log('Ошибка при оформлении заказа:', error)
     });
 });
 
+events.on('buyer:change', () => {
+    const buyer = buyerModel.getInfo();
+
+    order.render(buyer);
+    contacts.render(buyer);
+});
+
 events.on('success:close', () => {
-    basketModel.clear();
     modal.close();
 });

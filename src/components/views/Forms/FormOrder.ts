@@ -46,7 +46,7 @@ export class FormOrder extends Form<TFormOrder> {
 
         this.orderButtonElement.addEventListener('click', (event) => {
             event.preventDefault();
-            this.event.emit('form:next',  { email: this.paymentMethod, phone: this.addressElement.value });
+            this.event.emit('form:next',  { payment: this.paymentMethod, address: this.addressElement.value });
         })
 
     }
