@@ -157,7 +157,9 @@ events.on('basket:changed', () => {
             .firstElementChild!
             .cloneNode(true) as HTMLElement;
 
-        const card = new CardBasket(events, cardElement, product);
+        const card = new CardBasket(cardElement, {
+            onDelete: () => events.emit('basket:delete', product),
+        });
 
         return card.render({
             index: index + 1,
@@ -176,16 +178,9 @@ events.on('basket:changed', () => {
         price: basketModel.getTotalPrice()
     });
 
-    const selectedProduct = products.getSelectedProduct();
-
-    if (selectedProduct) {
-        cardPreview.render({
-            isExist: basketModel.getProductById(selectedProduct.id)
-        });
-    }
 })
 
-events.on('basket:delete', ({ product }: { product: IProduct }) => {
+events.on('basket:delete', (product: IProduct) => {
     basketModel.removeProduct(product);
 });
 

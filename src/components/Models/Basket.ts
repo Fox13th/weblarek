@@ -14,12 +14,6 @@ export class Basket {
     }
 
     public addProduct(product: IProduct): void {
-        const exists = this.selectedProducts.some(item => item.id === product.id);
-
-        if (exists) {
-            return;
-        }
-
         this.selectedProducts.push(product);
         this.event.emit('basket:changed');
     }
