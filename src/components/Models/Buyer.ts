@@ -23,7 +23,7 @@ export class Buyer {
         this.event.emit('buyer:change');
     }
 
-    public isValid(): ValidError {      
+    public validate(): ValidError {      
         let errors: ValidError = {};
 
         const requiredFields: (keyof IBuyer)[] = ['payment', 'email', 'phone', 'address'];

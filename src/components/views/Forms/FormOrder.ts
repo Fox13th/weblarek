@@ -4,7 +4,8 @@ import { IEvents } from "../../base/Events";
 import { ensureElement } from "../../../utils/utils";
 
 export type TFormOrder = Pick<IBuyer, 'payment' | 'address'>  & {
-    error: number;
+    valid: boolean;
+    error: string;
 };
 
 export class FormOrder extends Form<TFormOrder> {
@@ -27,32 +28,41 @@ export class FormOrder extends Form<TFormOrder> {
             this.paymentMethod = 'card';
             this.paymentCardElement.classList.add('button_alt-active');
             this.paymentCashElement.classList.remove('button_alt-active');
-            this.error = this.checkInput(this.addressElement, 'Адрес');
-            this.orderButtonElement.disabled = this.checkForm(this.addressElement, this.paymentMethod);
+
+            this.event.emit('form:change', {
+                payment: this.paymentMethod
+            });
         });
 
         this.paymentCashElement.addEventListener('click', () => {
             this.paymentMethod = 'cash';
             this.paymentCashElement.classList.add('button_alt-active');
             this.paymentCardElement.classList.remove('button_alt-active');
-            this.error = this.checkInput(this.addressElement, 'Адрес');
-            this.orderButtonElement.disabled = this.checkForm(this.addressElement, this.paymentMethod);
+
+            this.event.emit('form:change', {
+                payment: this.paymentMethod
+            });
         });
 
         this.addressElement.addEventListener('input', () => {
-            this.error = this.checkInput(this.addressElement, 'Адрес');
-            this.orderButtonElement.disabled = this.checkForm(this.addressElement, this.paymentMethod);
+            this.event.emit('form:change', {
+                address: this.addressElement.value
+            });
         });
 
-        this.orderButtonElement.addEventListener('click', (event) => {
+        this.submitButton.addEventListener('click', (event) => {
             event.preventDefault();
-            this.event.emit('form:next',  { payment: this.paymentMethod, address: this.addressElement.value });
-        })
+            this.event.emit('form:next');
+        });
 
     }
 
-    protected checkForm(address: HTMLInputElement, payment: TPayment | ''): boolean {
-        return this.checkInput(address, 'Адрес') !== '' || payment === '';
+    set payment(value: TPayment) {
+        this.paymentMethod = value;
+    }
+
+    set address(value: string) {
+        this.addressElement.value = value;
     }
 
 }

@@ -7,8 +7,8 @@ import { Card } from "./Card"
 type CategoryKey = keyof typeof categoryMap;
 
 export type TCardPreview = Pick<IProduct, 'title' | 'price' | 'image' | 'category' | 'description'> & {
-    isExist: boolean;
-    isAvailable: boolean;
+    button: string;
+    buttonDisable: boolean;
 };
 
 export class CardPreview extends Card<TCardPreview> {
@@ -49,15 +49,11 @@ export class CardPreview extends Card<TCardPreview> {
         this.describeElement.textContent = value;
     }
 
-    set isExist(value: boolean) {
-        this.buyButtonElement.textContent = value ? 'Удалить из корзины' : 'В корзину';
+    set button(value: string) {
+        this.buyButtonElement.textContent = value;
     }
 
-    set isAvailable(value: boolean) {
-        this.buyButtonElement.disabled = !value;
-
-        if (!value) {
-            this.buyButtonElement.textContent = 'Недоступно';
-        }
+    set buttonDisable(value: boolean) {
+        this.buyButtonElement.disabled = value;
     }
 }

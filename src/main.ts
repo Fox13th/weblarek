@@ -113,8 +113,8 @@ events.on('product:selected', () => {
         image: CDN_URL + product.image,
         price: product.price,
         description: product.description,
-        isExist: basketModel.getProductById(product.id),
-        isAvailable: product.price !== null
+        button: product.price === null ? 'Недоступно' : basketModel.getProductById(product.id) ? 'Удалить из корзины' : 'В корзину',
+        buttonDisable: product.price === null
     });
 
     modal.render({
@@ -190,18 +190,19 @@ events.on('basket:form', () => {
     });
 });
 
-events.on('form:next', (data: { payment: TPayment; address: string; }) => {
+events.on('form:change', (data) => {
     buyerModel.setInfo(data);
+});
 
+events.on('form:next', () => {
     modal.render({
         content: contacts.render()
     });
 });
 
-events.on('form:success', (data: { email: string; phone: string; }) => {
-    buyerModel.setInfo(data);
+events.on('form:success', () => {
     
-    const errors = buyerModel.isValid();
+    const errors = buyerModel.validate();
     
 
     if (Object.keys(errors).length > 0) {
@@ -236,9 +237,19 @@ events.on('form:success', (data: { email: string; phone: string; }) => {
 
 events.on('buyer:change', () => {
     const buyer = buyerModel.getInfo();
+    const error = buyerModel.validate();
 
-    order.render(buyer);
-    contacts.render(buyer);
+    order.render({
+        ...buyer,
+        valid: !error.payment && !error.address,
+        error: error.payment || error.address || ''
+    });
+    contacts.render({
+        ...buyer,
+        valid: !error.email && !error.phone,
+        error: error.email || error.phone || ''
+    });
+
 });
 
 events.on('success:close', () => {
