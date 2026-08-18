@@ -5,7 +5,7 @@ import { ensureElement } from "../../../utils/utils";
 
 export type TFormContact = Pick<IBuyer, 'email' | 'phone'>  & {
     valid: boolean
-    error: string;
+    errors: string;
 };
 
 export class FormContact extends Form<TFormContact> {

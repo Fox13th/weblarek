@@ -16,7 +16,7 @@ export abstract class Form<T> extends Component<T> {
         this.submitButton.disabled = !value;
     }
 
-    set error(value: string) {
+    set errors(value: string) {
         this.errorElement.textContent = value;
     }
 

@@ -242,12 +242,12 @@ events.on('buyer:change', () => {
     order.render({
         ...buyer,
         valid: !error.payment && !error.address,
-        error: error.payment || error.address || ''
+        errors: error.payment || error.address || ''
     });
     contacts.render({
         ...buyer,
         valid: !error.email && !error.phone,
-        error: error.email || error.phone || ''
+        errors: error.email || error.phone || ''
     });
 
 });

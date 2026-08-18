@@ -5,7 +5,7 @@ import { ensureElement } from "../../../utils/utils";
 
 export type TFormOrder = Pick<IBuyer, 'payment' | 'address'>  & {
     valid: boolean;
-    error: string;
+    errors: string;
 };
 
 export class FormOrder extends Form<TFormOrder> {
@@ -13,7 +13,6 @@ export class FormOrder extends Form<TFormOrder> {
     protected paymentCashElement: HTMLButtonElement;
     protected addressElement: HTMLInputElement;
     protected orderButtonElement: HTMLButtonElement;
-    protected paymentMethod: TPayment | '' = '';
 
 
     constructor(protected event: IEvents, container: HTMLElement) {
@@ -25,22 +24,14 @@ export class FormOrder extends Form<TFormOrder> {
         this.orderButtonElement = ensureElement<HTMLButtonElement>('.order__button', this.container);
 
         this.paymentCardElement.addEventListener('click', () => {
-            this.paymentMethod = 'card';
-            this.paymentCardElement.classList.add('button_alt-active');
-            this.paymentCashElement.classList.remove('button_alt-active');
-
             this.event.emit('form:change', {
-                payment: this.paymentMethod
+                payment: 'card'
             });
         });
 
         this.paymentCashElement.addEventListener('click', () => {
-            this.paymentMethod = 'cash';
-            this.paymentCashElement.classList.add('button_alt-active');
-            this.paymentCardElement.classList.remove('button_alt-active');
-
             this.event.emit('form:change', {
-                payment: this.paymentMethod
+                payment: 'cash'
             });
         });
 
@@ -58,7 +49,8 @@ export class FormOrder extends Form<TFormOrder> {
     }
 
     set payment(value: TPayment) {
-        this.paymentMethod = value;
+        this.paymentCardElement.classList.toggle('button_alt-active', value === 'card');
+        this.paymentCashElement.classList.toggle('button_alt-active', value === 'cash');
     }
 
     set address(value: string) {
