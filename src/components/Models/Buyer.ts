@@ -19,7 +19,10 @@ export class Buyer {
     }
 
     public clear(): void {
-        this.buyer = {};
+        this.buyer.payment = '';
+        this.buyer.email = '';
+        this.buyer.address = '';
+        this.buyer.phone = '';
         this.event.emit('buyer:change');
     }
 
